@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Heyama Objects",
+    "slug": "heyama-mobile",
+    "version": "1.0.0",
+    "scheme": "heyama",
+    "platforms": ["ios", "android"],
+    "splash": {
+      "backgroundColor": "#3b82f6"
+    },
+    "plugins": ["expo-router", "expo-image-picker"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
