@@ -5,7 +5,17 @@ import { useParams, useRouter } from 'next/navigation';
 import { getObject, deleteObject, type ObjectItem } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { ArrowLeft, Trash2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
 export default function ObjectDetailPage() {
@@ -15,6 +25,7 @@ export default function ObjectDetailPage() {
   const [object, setObject] = useState<ObjectItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -28,9 +39,8 @@ export default function ObjectDetailPage() {
     }
   }, [params.id, router]);
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
     if (!object) return;
-    if (!window.confirm(t('detail.confirm_delete'))) return;
     setDeleting(true);
     try {
       await deleteObject(object._id);
@@ -39,6 +49,7 @@ export default function ObjectDetailPage() {
     } catch {
       toast({ title: t('detail.toast.delete_fail'), variant: 'destructive' });
       setDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -93,7 +104,7 @@ export default function ObjectDetailPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleDelete}
+              onClick={() => setShowDeleteDialog(true)}
               disabled={deleting}
               className="rounded-full border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 shrink-0"
             >
@@ -107,6 +118,39 @@ export default function ObjectDetailPage() {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="border-red-100">
+          <AlertDialogHeader>
+            <div className="mx-auto sm:mx-0 w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-2">
+              <AlertTriangle className="h-6 w-6 text-red-500" />
+            </div>
+            <AlertDialogTitle className="text-purple-900">
+              {t('detail.confirm_delete_title')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('detail.confirm_delete_desc')}{' '}
+              <span className="font-semibold text-purple-700">{object.title}</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={deleting}
+              className="rounded-full border-purple-200 text-purple-700 hover:bg-purple-50"
+            >
+              {t('detail.confirm_cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="rounded-full bg-red-500 text-white hover:bg-red-600"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              {deleting ? t('detail.deleting') : t('detail.confirm_delete_btn')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

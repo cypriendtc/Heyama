@@ -5,7 +5,17 @@ import { getObjects, deleteObject, type ObjectItem, type PaginatedResponse } fro
 import { socket } from '@/lib/socket';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Trash2, Search, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
 export default function HomePage() {
@@ -16,6 +26,7 @@ export default function HomePage() {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<ObjectItem | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { t } = useTranslation();
 
@@ -61,15 +72,17 @@ export default function HomePage() {
     };
   }, [page, search, t]);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm(t('home.confirm_delete'))) return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteObject(id);
-      setObjects((prev) => prev.filter((o) => o._id !== id));
+      await deleteObject(deleteTarget._id);
+      setObjects((prev) => prev.filter((o) => o._id !== deleteTarget._id));
       setTotal((prev) => Math.max(0, prev - 1));
       toast({ title: t('home.toast.deleted') });
     } catch {
       toast({ title: t('home.toast.delete_fail'), variant: 'destructive' });
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -189,7 +202,7 @@ export default function HomePage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDelete(obj._id)}
+                      onClick={() => setDeleteTarget(obj)}
                       className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -227,6 +240,39 @@ export default function HomePage() {
           )}
         </>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="border-red-100">
+          <AlertDialogHeader>
+            <div className="mx-auto sm:mx-0 w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-2">
+              <AlertTriangle className="h-6 w-6 text-red-500" />
+            </div>
+            <AlertDialogTitle className="text-purple-900">
+              {t('home.confirm_delete_title')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && (
+                <>
+                  {t('home.confirm_delete_desc')}{' '}
+                  <span className="font-semibold text-purple-700">{deleteTarget.title}</span>
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full border-purple-200 text-purple-700 hover:bg-purple-50">
+              {t('home.confirm_cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="rounded-full bg-red-500 text-white hover:bg-red-600"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              {t('home.confirm_delete_btn')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
