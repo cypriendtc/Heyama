@@ -5,6 +5,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
@@ -32,8 +33,16 @@ export class ObjectsController {
   }
 
   @Get()
-  async findAll() {
-    return this.objectsService.findAll();
+  async findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.objectsService.findAll(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 12,
+      search || undefined,
+    );
   }
 
   @Get(':id')

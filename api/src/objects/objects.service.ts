@@ -5,6 +5,14 @@ import { ObjectEntity } from './schemas/object.schema';
 import { CreateObjectDto } from './dto/create-object.dto';
 import { S3Service } from '../s3/s3.service';
 
+export interface PaginatedResult {
+  data: ObjectEntity[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 @Injectable()
 export class ObjectsService {
   constructor(
@@ -25,8 +33,37 @@ export class ObjectsService {
     return created.save();
   }
 
-  async findAll(): Promise<ObjectEntity[]> {
-    return this.objectModel.find().sort({ createdAt: -1 }).exec();
+  async findAll(
+    page = 1,
+    limit = 12,
+    search?: string,
+  ): Promise<PaginatedResult> {
+    const filter = search
+      ? {
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.objectModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec(),
+      this.objectModel.countDocuments(filter).exec(),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: string): Promise<ObjectEntity> {

@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Alert,
   RefreshControl,
+  TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getObjects, deleteObject, type ObjectItem } from '../lib/api';
@@ -19,25 +20,33 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const [objects, setObjects] = useState<ObjectItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState('');
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const loadObjects = useCallback(async () => {
+  const loadObjects = useCallback(async (p: number, s: string, append = false) => {
     try {
-      const data = await getObjects();
-      setObjects(data);
+      const res = await getObjects(p, 12, s || undefined);
+      setObjects((prev) => append ? [...prev, ...res.data] : res.data);
+      setTotalPages(res.totalPages);
+      setPage(res.page);
     } catch (e) {
       Alert.alert('Error', t('home.alert.error'));
     }
   }, [t]);
 
   useEffect(() => {
-    loadObjects();
-  }, [loadObjects]);
+    loadObjects(1, search);
+  }, [search]);
 
   useEffect(() => {
     socket.connect();
 
     socket.on('object:created', (obj: ObjectItem) => {
-      setObjects((prev) => [obj, ...prev]);
+      if (page === 1 && !search) {
+        setObjects((prev) => [obj, ...prev]);
+      }
     });
 
     socket.on('object:deleted', (id: string) => {
@@ -49,12 +58,19 @@ export default function HomeScreen() {
       socket.off('object:deleted');
       socket.disconnect();
     };
-  }, []);
+  }, [page, search]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadObjects();
+    await loadObjects(1, search);
     setRefreshing(false);
+  };
+
+  const loadMore = async () => {
+    if (loadingMore || page >= totalPages) return;
+    setLoadingMore(true);
+    await loadObjects(page + 1, search, true);
+    setLoadingMore(false);
   };
 
   const handleDelete = (id: string) => {
@@ -95,6 +111,30 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
+  const renderHeader = () => (
+    <View style={styles.searchContainer}>
+      <TextInput
+        style={styles.searchInput}
+        value={search}
+        onChangeText={(text) => { setSearch(text); setPage(1); }}
+        placeholder={t('home.search')}
+        placeholderTextColor="#A78BFA"
+        returnKeyType="search"
+      />
+    </View>
+  );
+
+  const renderFooter = () => {
+    if (page >= totalPages) return null;
+    return (
+      <TouchableOpacity style={styles.loadMore} onPress={loadMore} activeOpacity={0.8}>
+        <Text style={styles.loadMoreText}>
+          {loadingMore ? '...' : t('home.load_more')}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -102,6 +142,10 @@ export default function HomeScreen() {
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.3}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -115,8 +159,12 @@ export default function HomeScreen() {
             <View style={styles.emptyIcon}>
               <Text style={styles.emptyHeart}>♥</Text>
             </View>
-            <Text style={styles.emptyText}>{t('home.empty')}</Text>
-            <Text style={styles.emptySubtext}>{t('home.empty.sub')}</Text>
+            <Text style={styles.emptyText}>
+              {search ? t('home.no_results') : t('home.empty')}
+            </Text>
+            {!search && (
+              <Text style={styles.emptySubtext}>{t('home.empty.sub')}</Text>
+            )}
           </View>
         }
       />
@@ -134,6 +182,17 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F3FF' },
   list: { padding: 16 },
+  searchContainer: { marginBottom: 16 },
+  searchInput: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    borderRadius: 24,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: '#1F2937',
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -152,7 +211,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: '700', color: '#3B0764' },
   description: { fontSize: 14, color: '#6B7280', marginTop: 4 },
   date: { fontSize: 12, color: '#A78BFA', marginTop: 8, fontWeight: '500' },
-  empty: { alignItems: 'center', paddingTop: 80 },
+  empty: { alignItems: 'center', paddingTop: 60 },
   emptyIcon: {
     width: 72,
     height: 72,
@@ -165,6 +224,14 @@ const styles = StyleSheet.create({
   emptyHeart: { fontSize: 32, color: '#7C3AED' },
   emptyText: { fontSize: 18, color: '#6B7280', fontWeight: '600' },
   emptySubtext: { fontSize: 14, color: '#A78BFA', marginTop: 8 },
+  loadMore: {
+    backgroundColor: '#EDE9FE',
+    borderRadius: 24,
+    padding: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  loadMoreText: { color: '#7C3AED', fontSize: 14, fontWeight: '600' },
   fab: {
     position: 'absolute',
     bottom: 24,

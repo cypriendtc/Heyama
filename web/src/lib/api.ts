@@ -14,8 +14,22 @@ export interface ObjectItem {
   createdAt: string;
 }
 
-export async function getObjects(): Promise<ObjectItem[]> {
-  const { data } = await api.get<ObjectItem[]>('/api/objects');
+export interface PaginatedResponse {
+  data: ObjectItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export async function getObjects(
+  page = 1,
+  limit = 12,
+  search?: string,
+): Promise<PaginatedResponse> {
+  const params: Record<string, string | number> = { page, limit };
+  if (search) params.search = search;
+  const { data } = await api.get<PaginatedResponse>('/api/objects', { params });
   return data;
 }
 

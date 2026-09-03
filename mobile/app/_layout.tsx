@@ -1,18 +1,14 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
 import { I18nProvider, useTranslation } from '../lib/i18n';
-import Svg, { Circle, Path } from 'react-native-svg';
 
 function HeyamaLogo() {
   return (
-    <Svg width={28} height={28} viewBox="0 0 100 100" fill="none">
-      <Circle cx="50" cy="50" r="46" stroke="white" strokeWidth="5" fill="none" />
-      <Path
-        d="M50 75C50 75 25 58 25 42C25 34 31 28 39 28C44 28 47.5 31 50 35C52.5 31 56 28 61 28C69 28 75 34 75 42C75 58 50 75 50 75Z"
-        fill="white"
-      />
-    </Svg>
+    <Image
+      source={require('../assets/logo.webp')}
+      style={{ width: 30, height: 30, borderRadius: 15 }}
+    />
   );
 }
 

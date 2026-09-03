@@ -1,35 +1,56 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getObjects, deleteObject, type ObjectItem } from '@/lib/api';
+import { useEffect, useState, useCallback } from 'react';
+import { getObjects, deleteObject, type ObjectItem, type PaginatedResponse } from '@/lib/api';
 import { socket } from '@/lib/socket';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
 export default function HomePage() {
   const [objects, setObjects] = useState<ObjectItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const { t } = useTranslation();
 
+  const loadObjects = useCallback(async (p: number, s: string) => {
+    setLoading(true);
+    try {
+      const res: PaginatedResponse = await getObjects(p, 12, s || undefined);
+      setObjects(res.data);
+      setTotalPages(res.totalPages);
+      setTotal(res.total);
+      setPage(res.page);
+    } catch {
+      toast({ title: t('home.toast.error'), variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
   useEffect(() => {
-    getObjects()
-      .then(setObjects)
-      .catch(() => toast({ title: t('home.toast.error'), variant: 'destructive' }))
-      .finally(() => setLoading(false));
-  }, []);
+    loadObjects(page, search);
+  }, [page, search, loadObjects]);
 
   useEffect(() => {
     socket.connect();
 
     socket.on('object:created', (obj: ObjectItem) => {
-      setObjects((prev) => [obj, ...prev]);
+      if (page === 1 && !search) {
+        setObjects((prev) => [obj, ...prev.slice(0, 11)]);
+        setTotal((prev) => prev + 1);
+      }
       toast({ title: t('home.toast.added'), description: obj.title });
     });
 
     socket.on('object:deleted', (id: string) => {
       setObjects((prev) => prev.filter((o) => o._id !== id));
+      setTotal((prev) => Math.max(0, prev - 1));
     });
 
     return () => {
@@ -37,19 +58,30 @@ export default function HomePage() {
       socket.off('object:deleted');
       socket.disconnect();
     };
-  }, []);
+  }, [page, search, t]);
 
   const handleDelete = async (id: string) => {
     try {
       await deleteObject(id);
       setObjects((prev) => prev.filter((o) => o._id !== id));
+      setTotal((prev) => Math.max(0, prev - 1));
       toast({ title: t('home.toast.deleted') });
     } catch {
       toast({ title: t('home.toast.delete_fail'), variant: 'destructive' });
     }
   };
 
-  if (loading) {
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    setSearch(searchInput);
+  };
+
+  const pageInfo = t('home.page_of')
+    .replace('{page}', String(page))
+    .replace('{total}', String(totalPages));
+
+  if (loading && objects.length === 0) {
     return (
       <div className="flex justify-center py-20">
         <div className="h-10 w-10 rounded-full border-4 border-purple-200 border-t-purple-600 animate-spin" />
@@ -57,75 +89,138 @@ export default function HomePage() {
     );
   }
 
-  if (objects.length === 0) {
-    return (
-      <div className="text-center py-20">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
-          <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="46" stroke="#9333EA" strokeWidth="4" fill="none" opacity="0.4" />
-            <path
-              d="M50 75C50 75 25 58 25 42C25 34 31 28 39 28C44 28 47.5 31 50 35C52.5 31 56 28 61 28C69 28 75 34 75 42C75 58 50 75 50 75Z"
-              fill="#9333EA"
-              opacity="0.4"
-            />
-          </svg>
-        </div>
-        <p className="text-muted-foreground text-lg">{t('home.empty')}</p>
-        <a
-          href="/create"
-          className="inline-block mt-4 bg-purple-600 text-white px-6 py-2.5 rounded-full font-medium hover:bg-purple-700 transition-colors"
-        >
-          {t('home.empty.cta')}
-        </a>
-      </div>
-    );
-  }
-
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-purple-900">{t('home.title')}</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {objects.map((obj) => (
-          <div
-            key={obj._id}
-            className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-purple-100"
-          >
-            <a href={`/objects/${obj._id}`}>
-              <img
-                src={obj.imageUrl}
-                alt={obj.title}
-                className="w-full h-48 object-cover"
-              />
-            </a>
-            <div className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <a
-                    href={`/objects/${obj._id}`}
-                    className="font-semibold text-lg text-purple-900 hover:text-purple-600 transition-colors"
-                  >
-                    {obj.title}
-                  </a>
-                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                    {obj.description}
-                  </p>
-                  <p className="text-xs text-purple-400 mt-2 font-medium">
-                    {new Date(obj.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(obj._id)}
-                  className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full shrink-0"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <h1 className="text-2xl font-bold text-purple-900">
+          {t('home.title')}
+          {total > 0 && (
+            <span className="ml-2 text-base font-normal text-purple-400">({total})</span>
+          )}
+        </h1>
+        <form onSubmit={handleSearch} className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t('home.search')}
+            className="w-full pl-10 pr-4 py-2 rounded-full border border-purple-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          />
+        </form>
       </div>
+
+      {objects.length === 0 && !loading ? (
+        <div className="text-center py-20">
+          {search ? (
+            <>
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
+                <Search className="h-8 w-8 text-purple-400" />
+              </div>
+              <p className="text-muted-foreground text-lg">
+                {t('home.no_results')} &quot;{search}&quot;
+              </p>
+              <button
+                onClick={() => { setSearchInput(''); setSearch(''); setPage(1); }}
+                className="mt-4 text-purple-600 hover:text-purple-700 font-medium"
+              >
+                {t('home.empty.cta')}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
+                <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
+                  <circle cx="50" cy="50" r="46" stroke="#9333EA" strokeWidth="4" fill="none" opacity="0.4" />
+                  <path
+                    d="M50 75C50 75 25 58 25 42C25 34 31 28 39 28C44 28 47.5 31 50 35C52.5 31 56 28 61 28C69 28 75 34 75 42C75 58 50 75 50 75Z"
+                    fill="#9333EA"
+                    opacity="0.4"
+                  />
+                </svg>
+              </div>
+              <p className="text-muted-foreground text-lg">{t('home.empty')}</p>
+              <a
+                href="/create"
+                className="inline-block mt-4 bg-purple-600 text-white px-6 py-2.5 rounded-full font-medium hover:bg-purple-700 transition-colors"
+              >
+                {t('home.empty.cta')}
+              </a>
+            </>
+          )}
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {objects.map((obj) => (
+              <div
+                key={obj._id}
+                className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-purple-100"
+              >
+                <a href={`/objects/${obj._id}`}>
+                  <img
+                    src={obj.imageUrl}
+                    alt={obj.title}
+                    className="w-full h-48 object-cover"
+                  />
+                </a>
+                <div className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <a
+                        href={`/objects/${obj._id}`}
+                        className="font-semibold text-lg text-purple-900 hover:text-purple-600 transition-colors"
+                      >
+                        {obj.title}
+                      </a>
+                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                        {obj.description}
+                      </p>
+                      <p className="text-xs text-purple-400 mt-2 font-medium">
+                        {new Date(obj.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(obj._id)}
+                      className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-8">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="rounded-full border-purple-200 text-purple-700 hover:bg-purple-50"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                {t('home.prev')}
+              </Button>
+              <span className="text-sm text-purple-600 font-medium">{pageInfo}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="rounded-full border-purple-200 text-purple-700 hover:bg-purple-50"
+              >
+                {t('home.next')}
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
