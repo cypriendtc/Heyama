@@ -14,7 +14,7 @@ export interface ObjectItem {
 }
 
 export async function getObjects(): Promise<ObjectItem[]> {
-  const { data } = await api.get<ObjectItem[]>('/objects');
+  const { data } = await api.get<ObjectItem[]>('/api/objects');
   return data;
 }
 
@@ -39,7 +39,7 @@ export async function createObjectFromForm(
     type: imageType || 'image/jpeg',
   } as any);
 
-  const { data } = await api.post<ObjectItem>('/objects', formData, {
+  const { data } = await api.post<ObjectItem>('/api/objects', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return data;

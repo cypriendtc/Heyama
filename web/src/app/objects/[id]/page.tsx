@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getObject, deleteObject, type ObjectItem } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 
@@ -13,6 +12,7 @@ export default function ObjectDetailPage() {
   const router = useRouter();
   const [object, setObject] = useState<ObjectItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -28,50 +28,81 @@ export default function ObjectDetailPage() {
 
   const handleDelete = async () => {
     if (!object) return;
+    setDeleting(true);
     try {
       await deleteObject(object._id);
       toast({ title: 'Object deleted' });
       router.push('/');
     } catch {
       toast({ title: 'Failed to delete', variant: 'destructive' });
+      setDeleting(false);
     }
   };
 
   if (loading) {
-    return <p className="text-center text-muted-foreground">Loading...</p>;
+    return (
+      <div className="flex justify-center py-20">
+        <div className="h-10 w-10 rounded-full border-4 border-purple-200 border-t-purple-600 animate-spin" />
+      </div>
+    );
   }
 
   if (!object) {
-    return <p className="text-center text-muted-foreground">Object not found</p>;
+    return (
+      <div className="text-center py-20">
+        <p className="text-muted-foreground text-lg">Object not found</p>
+        <a
+          href="/"
+          className="inline-block mt-4 text-purple-600 hover:text-purple-700 font-medium"
+        >
+          Go back home
+        </a>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Button variant="ghost" onClick={() => router.push('/')} className="mb-4">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to list
-      </Button>
+      <button
+        onClick={() => router.push('/')}
+        className="flex items-center gap-2 text-purple-600 hover:text-purple-800 font-medium mb-5 transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to list
+      </button>
 
-      <Card className="overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
         <img
           src={object.imageUrl}
           alt={object.title}
           className="w-full max-h-96 object-cover"
         />
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>{object.title}</CardTitle>
-            <Button variant="destructive" size="sm" onClick={handleDelete}>
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
+
+        <div className="p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold text-purple-900">{object.title}</h1>
+              <p className="text-xs text-purple-400 mt-1 font-medium">
+                {new Date(object.createdAt).toLocaleString()}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="rounded-full border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 shrink-0"
+            >
+              <Trash2 className="mr-1.5 h-4 w-4" />
+              {deleting ? 'Deleting...' : 'Delete'}
             </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">{object.description}</p>
-          <p className="text-xs text-muted-foreground mt-4">
-            Created: {new Date(object.createdAt).toLocaleString()}
-          </p>
-        </CardContent>
-      </Card>
+
+          <div className="mt-4 pt-4 border-t border-purple-100">
+            <p className="text-gray-600 leading-relaxed">{object.description}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -5,6 +5,12 @@
     "version": "1.0.0",
     "scheme": "heyama",
     "platforms": ["ios", "android"],
+    "android": {
+      "package": "tech.ancria.heyama",
+      "adaptiveIcon": {
+        "backgroundColor": "#3b82f6"
+      }
+    },
     "splash": {
       "backgroundColor": "#3b82f6"
     },

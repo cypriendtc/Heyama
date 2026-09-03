@@ -15,22 +15,22 @@ export interface ObjectItem {
 }
 
 export async function getObjects(): Promise<ObjectItem[]> {
-  const { data } = await api.get<ObjectItem[]>('/objects');
+  const { data } = await api.get<ObjectItem[]>('/api/objects');
   return data;
 }
 
 export async function getObject(id: string): Promise<ObjectItem> {
-  const { data } = await api.get<ObjectItem>(`/objects/${id}`);
+  const { data } = await api.get<ObjectItem>(`/api/objects/${id}`);
   return data;
 }
 
 export async function createObject(formData: FormData): Promise<ObjectItem> {
-  const { data } = await api.post<ObjectItem>('/objects', formData, {
+  const { data } = await api.post<ObjectItem>('/api/objects', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return data;
 }
 
 export async function deleteObject(id: string): Promise<void> {
-  await api.delete(`/objects/${id}`);
+  await api.delete(`/api/objects/${id}`);
 }

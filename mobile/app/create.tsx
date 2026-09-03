@@ -63,6 +63,7 @@ export default function CreateScreen() {
           value={title}
           onChangeText={setTitle}
           placeholder="Enter title"
+          placeholderTextColor="#A78BFA"
         />
 
         <Text style={styles.label}>Description</Text>
@@ -71,16 +72,18 @@ export default function CreateScreen() {
           value={description}
           onChangeText={setDescription}
           placeholder="Enter description"
+          placeholderTextColor="#A78BFA"
           multiline
           numberOfLines={4}
         />
 
         <Text style={styles.label}>Image</Text>
-        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+        <TouchableOpacity style={styles.imagePicker} onPress={pickImage} activeOpacity={0.8}>
           {image ? (
             <Image source={{ uri: image.uri }} style={styles.preview} />
           ) : (
             <View style={styles.placeholder}>
+              <Text style={styles.placeholderIcon}>🖼</Text>
               <Text style={styles.placeholderText}>Tap to select image</Text>
             </View>
           )}
@@ -90,6 +93,7 @@ export default function CreateScreen() {
           style={[styles.button, submitting && styles.buttonDisabled]}
           onPress={handleSubmit}
           disabled={submitting}
+          activeOpacity={0.85}
         >
           {submitting ? (
             <ActivityIndicator color="#fff" />
@@ -103,45 +107,47 @@ export default function CreateScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1, backgroundColor: '#F5F3FF' },
   form: { padding: 16 },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#3B0764',
     marginBottom: 6,
     marginTop: 16,
   },
   input: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: '#DDD6FE',
+    borderRadius: 12,
+    padding: 14,
     fontSize: 16,
+    color: '#1F2937',
   },
   textArea: { minHeight: 100, textAlignVertical: 'top' },
   imagePicker: { marginTop: 4 },
-  preview: { width: '100%', height: 200, borderRadius: 8 },
+  preview: { width: '100%', height: 200, borderRadius: 12 },
   placeholder: {
     width: '100%',
     height: 200,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: '#C4B5FD',
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fafafa',
+    backgroundColor: '#EDE9FE',
   },
-  placeholderText: { color: '#999', fontSize: 16 },
+  placeholderIcon: { fontSize: 32, marginBottom: 8 },
+  placeholderText: { color: '#7C3AED', fontSize: 15, fontWeight: '500' },
   button: {
-    backgroundColor: '#3b82f6',
-    borderRadius: 8,
+    backgroundColor: '#7C3AED',
+    borderRadius: 28,
     padding: 16,
     alignItems: 'center',
     marginTop: 24,
   },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });

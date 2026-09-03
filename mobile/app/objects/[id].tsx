@@ -52,7 +52,7 @@ export default function ObjectDetailScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color="#7C3AED" />
       </View>
     );
   }
@@ -60,7 +60,7 @@ export default function ObjectDetailScreen() {
   if (!object) {
     return (
       <View style={styles.centered}>
-        <Text>Object not found</Text>
+        <Text style={styles.notFound}>Object not found</Text>
       </View>
     );
   }
@@ -70,12 +70,19 @@ export default function ObjectDetailScreen() {
       <Image source={{ uri: object.imageUrl }} style={styles.image} />
       <View style={styles.content}>
         <Text style={styles.title}>{object.title}</Text>
-        <Text style={styles.description}>{object.description}</Text>
         <Text style={styles.date}>
-          Created: {new Date(object.createdAt).toLocaleString()}
+          {new Date(object.createdAt).toLocaleString()}
         </Text>
 
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+        <View style={styles.divider} />
+
+        <Text style={styles.description}>{object.description}</Text>
+
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={handleDelete}
+          activeOpacity={0.85}
+        >
           <Text style={styles.deleteButtonText}>Delete Object</Text>
         </TouchableOpacity>
       </View>
@@ -84,19 +91,33 @@ export default function ObjectDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  container: { flex: 1, backgroundColor: '#F5F3FF' },
+  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F3FF' },
+  notFound: { fontSize: 16, color: '#6B7280' },
   image: { width: '100%', height: 300 },
-  content: { padding: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#111' },
-  description: { fontSize: 16, color: '#555', marginTop: 12, lineHeight: 24 },
-  date: { fontSize: 12, color: '#999', marginTop: 16 },
+  content: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginTop: -20,
+  },
+  title: { fontSize: 24, fontWeight: 'bold', color: '#3B0764' },
+  date: { fontSize: 13, color: '#A78BFA', marginTop: 4, fontWeight: '500' },
+  divider: {
+    height: 1,
+    backgroundColor: '#EDE9FE',
+    marginVertical: 16,
+  },
+  description: { fontSize: 16, color: '#4B5563', lineHeight: 24 },
   deleteButton: {
-    backgroundColor: '#ef4444',
-    borderRadius: 8,
+    backgroundColor: '#FEE2E2',
+    borderRadius: 28,
     padding: 14,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 28,
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
-  deleteButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  deleteButtonText: { color: '#DC2626', fontSize: 16, fontWeight: '600' },
 });

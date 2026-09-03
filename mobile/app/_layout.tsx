@@ -4,17 +4,18 @@ import { StatusBar } from 'expo-status-bar';
 export default function RootLayout() {
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: '#3b82f6' },
+          headerStyle: { backgroundColor: '#7C3AED' },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: 'bold' },
+          headerShadowVisible: false,
         }}
       >
         <Stack.Screen
           name="index"
-          options={{ title: 'Heyama Objects' }}
+          options={{ title: 'Heyama' }}
         />
         <Stack.Screen
           name="create"
@@ -22,7 +23,7 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="objects/[id]"
-          options={{ title: 'Object Details' }}
+          options={{ title: 'Details' }}
         />
       </Stack>
     </>

@@ -44,6 +44,10 @@ export class S3Service implements OnModuleInit {
     await this.client.putObject(this.bucket, key, file.buffer, file.size, {
       'Content-Type': file.mimetype,
     });
+    const publicUrl = this.config.get<string>('S3_PUBLIC_URL');
+    if (publicUrl) {
+      return `${publicUrl}/${key}`;
+    }
     const endpoint = this.config.get<string>('MINIO_ENDPOINT') || 'localhost';
     const port = this.config.get<string>('MINIO_PORT') || '9000';
     return `http://${endpoint}:${port}/${this.bucket}/${key}`;
