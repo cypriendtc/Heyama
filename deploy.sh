@@ -7,7 +7,11 @@ echo "=== Heyama Deployment ==="
 
 # 1. Start MongoDB + MinIO (won't affect existing containers)
 echo "[1/5] Starting MongoDB & MinIO..."
-docker compose up -d
+if command -v docker-compose &>/dev/null; then
+  docker-compose up -d
+else
+  docker compose up -d
+fi
 sleep 3
 
 # 2. Build API
