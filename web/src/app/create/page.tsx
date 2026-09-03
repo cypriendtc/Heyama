@@ -8,9 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
+import { useTranslation } from '@/lib/i18n';
 
 export default function CreatePage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -29,7 +31,7 @@ export default function CreatePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !file) {
-      toast({ title: 'Please fill all fields and select an image', variant: 'destructive' });
+      toast({ title: t('create.toast.fill'), variant: 'destructive' });
       return;
     }
 
@@ -40,10 +42,10 @@ export default function CreatePage() {
       formData.append('description', description);
       formData.append('image', file);
       await createObject(formData);
-      toast({ title: 'Object created successfully!' });
+      toast({ title: t('create.toast.success') });
       router.push('/');
     } catch {
-      toast({ title: 'Failed to create object', variant: 'destructive' });
+      toast({ title: t('create.toast.error'), variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -53,37 +55,37 @@ export default function CreatePage() {
     <div className="max-w-lg mx-auto">
       <div className="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
         <div className="bg-gradient-to-r from-purple-700 to-fuchsia-600 px-6 py-5">
-          <h1 className="text-xl font-bold text-white">Create New Object</h1>
-          <p className="text-purple-200 text-sm mt-1">Add an object to your collection</p>
+          <h1 className="text-xl font-bold text-white">{t('create.title')}</h1>
+          <p className="text-purple-200 text-sm mt-1">{t('create.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-purple-900 font-medium">Title</Label>
+            <Label htmlFor="title" className="text-purple-900 font-medium">{t('create.label.title')}</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter title"
+              placeholder={t('create.placeholder.title')}
               className="rounded-xl border-purple-200 focus-visible:ring-purple-500"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-purple-900 font-medium">Description</Label>
+            <Label htmlFor="description" className="text-purple-900 font-medium">{t('create.label.description')}</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter description"
+              placeholder={t('create.placeholder.description')}
               className="rounded-xl border-purple-200 focus-visible:ring-purple-500"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image" className="text-purple-900 font-medium">Image</Label>
+            <Label htmlFor="image" className="text-purple-900 font-medium">{t('create.label.image')}</Label>
             {preview ? (
               <div className="relative group">
                 <img
@@ -110,7 +112,7 @@ export default function CreatePage() {
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21,15 16,10 5,21" />
                 </svg>
-                <span className="text-purple-500 text-sm font-medium">Tap to select image</span>
+                <span className="text-purple-500 text-sm font-medium">{t('create.placeholder.image')}</span>
               </button>
             )}
             <input
@@ -133,10 +135,10 @@ export default function CreatePage() {
               {submitting ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                  Creating...
+                  {t('create.btn.submitting')}
                 </span>
               ) : (
-                'Create Object'
+                t('create.btn.submit')
               )}
             </Button>
             <Button
@@ -145,7 +147,7 @@ export default function CreatePage() {
               onClick={() => router.push('/')}
               className="rounded-full h-11 border-purple-200 text-purple-700 hover:bg-purple-50"
             >
-              Cancel
+              {t('create.btn.cancel')}
             </Button>
           </div>
         </form>

@@ -6,15 +6,17 @@ import { socket } from '@/lib/socket';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export default function HomePage() {
   const [objects, setObjects] = useState<ObjectItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     getObjects()
       .then(setObjects)
-      .catch(() => toast({ title: 'Error loading objects', variant: 'destructive' }))
+      .catch(() => toast({ title: t('home.toast.error'), variant: 'destructive' }))
       .finally(() => setLoading(false));
   }, []);
 
@@ -23,7 +25,7 @@ export default function HomePage() {
 
     socket.on('object:created', (obj: ObjectItem) => {
       setObjects((prev) => [obj, ...prev]);
-      toast({ title: 'New object added!', description: obj.title });
+      toast({ title: t('home.toast.added'), description: obj.title });
     });
 
     socket.on('object:deleted', (id: string) => {
@@ -41,9 +43,9 @@ export default function HomePage() {
     try {
       await deleteObject(id);
       setObjects((prev) => prev.filter((o) => o._id !== id));
-      toast({ title: 'Object deleted' });
+      toast({ title: t('home.toast.deleted') });
     } catch {
-      toast({ title: 'Failed to delete', variant: 'destructive' });
+      toast({ title: t('home.toast.delete_fail'), variant: 'destructive' });
     }
   };
 
@@ -60,19 +62,20 @@ export default function HomePage() {
       <div className="text-center py-20">
         <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
           <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="46" stroke="#9333EA" strokeWidth="4" fill="none" opacity="0.4" />
             <path
-              d="M50 80C50 80 20 60 20 40C20 30 28 22 38 22C44 22 48 26 50 30C52 26 56 22 62 22C72 22 80 30 80 40C80 60 50 80 50 80Z"
+              d="M50 75C50 75 25 58 25 42C25 34 31 28 39 28C44 28 47.5 31 50 35C52.5 31 56 28 61 28C69 28 75 34 75 42C75 58 50 75 50 75Z"
               fill="#9333EA"
               opacity="0.4"
             />
           </svg>
         </div>
-        <p className="text-muted-foreground text-lg">No objects yet</p>
+        <p className="text-muted-foreground text-lg">{t('home.empty')}</p>
         <a
           href="/create"
           className="inline-block mt-4 bg-purple-600 text-white px-6 py-2.5 rounded-full font-medium hover:bg-purple-700 transition-colors"
         >
-          Create your first object
+          {t('home.empty.cta')}
         </a>
       </div>
     );
@@ -80,7 +83,7 @@ export default function HomePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-purple-900">All Objects</h1>
+      <h1 className="text-2xl font-bold mb-6 text-purple-900">{t('home.title')}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {objects.map((obj) => (
           <div

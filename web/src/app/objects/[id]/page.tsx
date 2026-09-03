@@ -6,10 +6,12 @@ import { getObject, deleteObject, type ObjectItem } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { ArrowLeft, Trash2 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export default function ObjectDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { t } = useTranslation();
   const [object, setObject] = useState<ObjectItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -19,7 +21,7 @@ export default function ObjectDetailPage() {
       getObject(params.id as string)
         .then(setObject)
         .catch(() => {
-          toast({ title: 'Object not found', variant: 'destructive' });
+          toast({ title: t('detail.toast.not_found'), variant: 'destructive' });
           router.push('/');
         })
         .finally(() => setLoading(false));
@@ -31,10 +33,10 @@ export default function ObjectDetailPage() {
     setDeleting(true);
     try {
       await deleteObject(object._id);
-      toast({ title: 'Object deleted' });
+      toast({ title: t('detail.toast.deleted') });
       router.push('/');
     } catch {
-      toast({ title: 'Failed to delete', variant: 'destructive' });
+      toast({ title: t('detail.toast.delete_fail'), variant: 'destructive' });
       setDeleting(false);
     }
   };
@@ -50,12 +52,12 @@ export default function ObjectDetailPage() {
   if (!object) {
     return (
       <div className="text-center py-20">
-        <p className="text-muted-foreground text-lg">Object not found</p>
+        <p className="text-muted-foreground text-lg">{t('detail.not_found')}</p>
         <a
           href="/"
           className="inline-block mt-4 text-purple-600 hover:text-purple-700 font-medium"
         >
-          Go back home
+          {t('detail.go_home')}
         </a>
       </div>
     );
@@ -68,7 +70,7 @@ export default function ObjectDetailPage() {
         className="flex items-center gap-2 text-purple-600 hover:text-purple-800 font-medium mb-5 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to list
+        {t('detail.back')}
       </button>
 
       <div className="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
@@ -94,7 +96,7 @@ export default function ObjectDetailPage() {
               className="rounded-full border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 shrink-0"
             >
               <Trash2 className="mr-1.5 h-4 w-4" />
-              {deleting ? 'Deleting...' : 'Delete'}
+              {deleting ? t('detail.deleting') : t('detail.delete')}
             </Button>
           </div>
 

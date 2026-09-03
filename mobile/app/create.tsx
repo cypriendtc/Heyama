@@ -13,9 +13,11 @@ import {
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { createObjectFromForm } from '../lib/api';
+import { useTranslation } from '../lib/i18n';
 
 export default function CreateScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
@@ -35,7 +37,7 @@ export default function CreateScreen() {
 
   const handleSubmit = async () => {
     if (!title || !description || !image) {
-      Alert.alert('Error', 'Please fill all fields and select an image');
+      Alert.alert('Error', t('create.alert.fill'));
       return;
     }
 
@@ -44,11 +46,11 @@ export default function CreateScreen() {
       const fileName = image.uri.split('/').pop() || 'photo.jpg';
       const fileType = image.mimeType || 'image/jpeg';
       await createObjectFromForm(title, description, image.uri, fileName, fileType);
-      Alert.alert('Success', 'Object created!', [
+      Alert.alert('Success', t('create.alert.success'), [
         { text: 'OK', onPress: () => router.back() },
       ]);
     } catch (e) {
-      Alert.alert('Error', 'Failed to create object');
+      Alert.alert('Error', t('create.alert.error'));
     } finally {
       setSubmitting(false);
     }
@@ -57,34 +59,34 @@ export default function CreateScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.label}>Title</Text>
+        <Text style={styles.label}>{t('create.label.title')}</Text>
         <TextInput
           style={styles.input}
           value={title}
           onChangeText={setTitle}
-          placeholder="Enter title"
+          placeholder={t('create.placeholder.title')}
           placeholderTextColor="#A78BFA"
         />
 
-        <Text style={styles.label}>Description</Text>
+        <Text style={styles.label}>{t('create.label.description')}</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           value={description}
           onChangeText={setDescription}
-          placeholder="Enter description"
+          placeholder={t('create.placeholder.description')}
           placeholderTextColor="#A78BFA"
           multiline
           numberOfLines={4}
         />
 
-        <Text style={styles.label}>Image</Text>
+        <Text style={styles.label}>{t('create.label.image')}</Text>
         <TouchableOpacity style={styles.imagePicker} onPress={pickImage} activeOpacity={0.8}>
           {image ? (
             <Image source={{ uri: image.uri }} style={styles.preview} />
           ) : (
             <View style={styles.placeholder}>
               <Text style={styles.placeholderIcon}>🖼</Text>
-              <Text style={styles.placeholderText}>Tap to select image</Text>
+              <Text style={styles.placeholderText}>{t('create.placeholder.image')}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -98,7 +100,7 @@ export default function CreateScreen() {
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Create Object</Text>
+            <Text style={styles.buttonText}>{t('create.btn.submit')}</Text>
           )}
         </TouchableOpacity>
       </View>

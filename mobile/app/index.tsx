@@ -12,9 +12,11 @@ import {
 import { useRouter } from 'expo-router';
 import { getObjects, deleteObject, type ObjectItem } from '../lib/api';
 import { socket } from '../lib/socket';
+import { useTranslation } from '../lib/i18n';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [objects, setObjects] = useState<ObjectItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -23,9 +25,9 @@ export default function HomeScreen() {
       const data = await getObjects();
       setObjects(data);
     } catch (e) {
-      Alert.alert('Error', 'Failed to load objects');
+      Alert.alert('Error', t('home.alert.error'));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadObjects();
@@ -56,17 +58,17 @@ export default function HomeScreen() {
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert('Delete', 'Are you sure?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('home.alert.delete'), t('home.alert.confirm'), [
+      { text: t('home.alert.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('home.alert.delete'),
         style: 'destructive',
         onPress: async () => {
           try {
             await deleteObject(id);
             setObjects((prev) => prev.filter((o) => o._id !== id));
           } catch {
-            Alert.alert('Error', 'Failed to delete');
+            Alert.alert('Error', t('home.alert.error'));
           }
         },
       },
@@ -113,10 +115,8 @@ export default function HomeScreen() {
             <View style={styles.emptyIcon}>
               <Text style={styles.emptyHeart}>♥</Text>
             </View>
-            <Text style={styles.emptyText}>No objects yet</Text>
-            <Text style={styles.emptySubtext}>
-              Tap the + button to create one
-            </Text>
+            <Text style={styles.emptyText}>{t('home.empty')}</Text>
+            <Text style={styles.emptySubtext}>{t('home.empty.sub')}</Text>
           </View>
         }
       />

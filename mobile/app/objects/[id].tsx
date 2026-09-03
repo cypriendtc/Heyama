@@ -11,10 +11,12 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getObject, deleteObject, type ObjectItem } from '../../lib/api';
+import { useTranslation } from '../../lib/i18n';
 
 export default function ObjectDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const [object, setObject] = useState<ObjectItem | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +25,7 @@ export default function ObjectDetailScreen() {
       getObject(id)
         .then(setObject)
         .catch(() => {
-          Alert.alert('Error', 'Object not found');
+          Alert.alert('Error', t('detail.not_found'));
           router.back();
         })
         .finally(() => setLoading(false));
@@ -32,17 +34,17 @@ export default function ObjectDetailScreen() {
 
   const handleDelete = () => {
     if (!object) return;
-    Alert.alert('Delete', 'Are you sure you want to delete this object?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('detail.alert.title'), t('detail.alert.confirm'), [
+      { text: t('detail.alert.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('detail.alert.title'),
         style: 'destructive',
         onPress: async () => {
           try {
             await deleteObject(object._id);
             router.back();
           } catch {
-            Alert.alert('Error', 'Failed to delete');
+            Alert.alert('Error', t('detail.alert.error'));
           }
         },
       },
@@ -60,7 +62,7 @@ export default function ObjectDetailScreen() {
   if (!object) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.notFound}>Object not found</Text>
+        <Text style={styles.notFound}>{t('detail.not_found')}</Text>
       </View>
     );
   }
@@ -83,7 +85,7 @@ export default function ObjectDetailScreen() {
           onPress={handleDelete}
           activeOpacity={0.85}
         >
-          <Text style={styles.deleteButtonText}>Delete Object</Text>
+          <Text style={styles.deleteButtonText}>{t('detail.delete')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
