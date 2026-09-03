@@ -14,6 +14,7 @@ const translations = {
     'home.toast.deleted': 'Objet supprimé',
     'home.toast.error': 'Erreur de chargement',
     'home.toast.delete_fail': 'Échec de la suppression',
+    'home.confirm_delete': 'Voulez-vous vraiment supprimer cet objet ?',
     'home.search': 'Rechercher...',
     'home.no_results': 'Aucun résultat pour',
     'home.page_of': 'Page {page} sur {total}',
@@ -41,6 +42,7 @@ const translations = {
     'detail.toast.not_found': 'Objet introuvable',
     'detail.toast.deleted': 'Objet supprimé',
     'detail.toast.delete_fail': 'Échec de la suppression',
+    'detail.confirm_delete': 'Voulez-vous vraiment supprimer cet objet ?',
   },
   en: {
     'nav.new': '+ New Object',
@@ -51,6 +53,7 @@ const translations = {
     'home.toast.deleted': 'Object deleted',
     'home.toast.error': 'Error loading objects',
     'home.toast.delete_fail': 'Failed to delete',
+    'home.confirm_delete': 'Are you sure you want to delete this object?',
     'home.search': 'Search...',
     'home.no_results': 'No results for',
     'home.page_of': 'Page {page} of {total}',
@@ -78,6 +81,7 @@ const translations = {
     'detail.toast.not_found': 'Object not found',
     'detail.toast.deleted': 'Object deleted',
     'detail.toast.delete_fail': 'Failed to delete',
+    'detail.confirm_delete': 'Are you sure you want to delete this object?',
   },
 } as const;
 

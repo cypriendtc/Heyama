@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heyama - Document de livraison</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+  @page {
+    margin: 20mm 18mm;
+    size: A4;
+  }
+
+  body {
+    background: #fff;
+    color: #2D2640;
+    font-family: 'Source Sans 3', 'Georgia', serif;
+    line-height: 1.65;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    line-height: 1.2;
+  }
+
+  .header {
+    border-bottom: 2px solid #7C3AED;
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .project-name {
+    font-size: 28px;
+    font-weight: 800;
+    color: #3B0764;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  .doc-type {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #6D28D9;
+    background: #F3F0FF;
+    padding: 4px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 14px;
+    color: #6B6480;
+    margin-top: 12px;
+  }
+
+  .meta-row span { white-space: nowrap; }
+  .meta-label { font-weight: 600; color: #2D2640; }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #3B0764;
+    margin: 32px 0 14px;
+    padding-left: 14px;
+    border-left: 3px solid #7C3AED;
+    page-break-after: avoid;
+  }
+
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 14px 0;
+  }
+
+  .stack-card {
+    background: #fff;
+    border: 1px solid #E8E5F0;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .stack-card strong {
+    display: block;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #7C3AED;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 3px;
+  }
+
+  .stack-card span {
+    font-size: 14px;
+    color: #2D2640;
+  }
+
+  .feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0;
+  }
+
+  .feature-list li {
+    position: relative;
+    padding: 8px 0 8px 24px;
+    border-bottom: 1px solid #E8E5F0;
+    font-size: 14px;
+    page-break-inside: avoid;
+  }
+
+  .feature-list li:last-child { border-bottom: none; }
+
+  .feature-list li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    color: #059669;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .feature-desc {
+    color: #6B6480;
+    font-size: 12px;
+    display: block;
+    margin-top: 2px;
+  }
+
+  .url-block {
+    background: #fff;
+    border: 1px solid #E8E5F0;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    font-family: 'SFMono-Regular', 'Consolas', monospace;
+    font-size: 13px;
+    word-break: break-all;
+    page-break-inside: avoid;
+  }
+
+  .url-block .label {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6B6480;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .url-block a {
+    color: #7C3AED;
+    text-decoration: none;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-left: 8px;
+  }
+
+  .status-badge.live {
+    background: #ECFDF5;
+    color: #059669;
+  }
+
+  .status-badge.pending {
+    background: #FFFBEB;
+    color: #D97706;
+  }
+
+  .status-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .commits-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 14px 0;
+  }
+
+  .commits-table th {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6B6480;
+    text-align: left;
+    padding: 7px 10px;
+    border-bottom: 2px solid #E8E5F0;
+  }
+
+  .commits-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #E8E5F0;
+    vertical-align: top;
+  }
+
+  .commits-table code {
+    font-family: 'SFMono-Regular', 'Consolas', monospace;
+    font-size: 11px;
+    background: #F3F0FF;
+    color: #6D28D9;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .commits-table a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .commits-table a:hover code {
+    background: #E8E0FF;
+    text-decoration: underline;
+  }
+
+  .footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #E8E5F0;
+    font-size: 12px;
+    color: #6B6480;
+    text-align: center;
+  }
+
+  @media print {
+    body { padding: 0; }
+    .url-block a { color: #7C3AED; }
+    .status-badge.live { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .status-badge.pending { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .stack-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .doc-type { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .feature-list li::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    h2 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .commits-table code { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div style="display:flex;align-items:center;gap:12px">
+      <img src="data:image/webp;base64,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" alt="Heyama" style="width:42px;height:42px;border-radius:50%">
+      <h1 class="project-name">Heyama</h1>
+    </div>
+    <span class="doc-type">Document de livraison</span>
+  </div>
+  <div class="meta-row">
+    <span><span class="meta-label">Client :</span> Heyama Dev Team</span>
+    <span><span class="meta-label">Date :</span> 4 septembre 2026</span>
+    <span><span class="meta-label">Version :</span> 1.0.0</span>
+  </div>
+</div>
+
+<h2>Stack technique</h2>
+<div class="stack-grid">
+  <div class="stack-card">
+    <strong>API</strong>
+    <span>NestJS, Mongoose, MinIO S3, Swagger</span>
+  </div>
+  <div class="stack-card">
+    <strong>Web</strong>
+    <span>Next.js 14, shadcn/ui, Tailwind</span>
+  </div>
+  <div class="stack-card">
+    <strong>Mobile</strong>
+    <span>React Native, Expo SDK 57</span>
+  </div>
+  <div class="stack-card">
+    <strong>Infra</strong>
+    <span>Docker, PM2, Apache</span>
+  </div>
+  <div class="stack-card">
+    <strong>Base de donnees</strong>
+    <span>MongoDB</span>
+  </div>
+  <div class="stack-card">
+    <strong>Temps reel</strong>
+    <span>Socket.IO</span>
+  </div>
+</div>
+
+<h2>Fonctionnalites livrees</h2>
+<ul class="feature-list">
+  <li>
+    CRUD complet des objets
+    <span class="feature-desc">Creation avec upload d'image, consultation, suppression. API REST + interface web et mobile.</span>
+  </li>
+  <li>
+    Upload et stockage d'images via MinIO (S3)
+    <span class="feature-desc">Les images sont stockees sur un bucket S3-compatible et servies via le proxy Apache.</span>
+  </li>
+  <li>
+    Optimisation des images
+    <span class="feature-desc">Compression automatique en WebP (max 1200px, qualite 80) et generation de thumbnails (400px) via sharp. Reduction d'environ 90% du poids.</span>
+  </li>
+  <li>
+    Temps reel via WebSocket
+    <span class="feature-desc">Les nouveaux objets et suppressions apparaissent instantanement sur tous les clients connectes.</span>
+  </li>
+  <li>
+    Recherche instantanee
+    <span class="feature-desc">Filtrage en temps reel pendant la saisie (debounce 300ms). Recherche par titre et description.</span>
+  </li>
+  <li>
+    Pagination
+    <span class="feature-desc">Web : navigation par pages. Mobile : scroll infini avec "Charger plus".</span>
+  </li>
+  <li>
+    Multilingue FR / EN
+    <span class="feature-desc">Switcher de langue dans le header, web et mobile, avec persistance du choix.</span>
+  </li>
+  <li>
+    Design responsive
+    <span class="feature-desc">Interface adaptee mobile, tablette et desktop avec la charte graphique Heyama (violet).</span>
+  </li>
+  <li>
+    Documentation API interactive
+    <span class="feature-desc">Swagger UI accessible a /api/docs. Permet de tester tous les endpoints depuis le navigateur.</span>
+  </li>
+  <li>
+    Application mobile Android (APK)
+    <span class="feature-desc">Build via EAS Build. Distribution interne pour tests.</span>
+  </li>
+</ul>
+
+<h2>Deploiement</h2>
+<div class="url-block">
+  <span class="label">Application web</span>
+  <a href="https://heyama.ancria.tech" target="_blank">heyama.ancria.tech</a>
+  <span class="status-badge live">En ligne</span>
+</div>
+<div class="url-block">
+  <span class="label">API REST</span>
+  <a href="https://heyama.ancria.tech/api" target="_blank">heyama.ancria.tech/api</a>
+  <span class="status-badge live">En ligne</span>
+</div>
+<div class="url-block">
+  <span class="label">Documentation API (Swagger)</span>
+  <a href="https://heyama.ancria.tech/api/docs" target="_blank">heyama.ancria.tech/api/docs</a>
+  <span class="status-badge live">En ligne</span>
+</div>
+<div class="url-block">
+  <span class="label">APK Android</span>
+  <a href="https://expo.dev/accounts/cypriendtcs-team/projects/heyama/builds/2dad46ea-3603-4709-9353-91ec68997d50" target="_blank">EAS Build sur expo.dev</a>
+  <span class="status-badge pending">En cours</span>
+</div>
+
+<h2>Depot Git</h2>
+<div class="url-block">
+  <span class="label">Repository GitHub</span>
+  <a href="https://github.com/cypriendtc/Heyama" target="_blank">github.com/cypriendtc/Heyama</a>
+</div>
+
+<h2>Architecture serveur (VPS)</h2>
+<ul class="feature-list">
+  <li>Docker Compose : MongoDB + MinIO</li>
+  <li>PM2 : API NestJS (port 3001) + Web Next.js (port 3000)</li>
+  <li>Apache : reverse proxy SSL sur heyama.ancria.tech</li>
+  <li>Routes : /api vers API, /storage vers MinIO, /socket.io vers WebSocket, / vers Web</li>
+</ul>
+
+<h2>Historique des commits</h2>
+<table class="commits-table">
+  <thead>
+    <tr><th>Hash</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/3c567fd" target="_blank"><code>3c567fd</code></a></td><td>Initial commit : app full-stack Heyama Objects</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/f76c3d0" target="_blank"><code>f76c3d0</code></a></td><td>Charte graphique Heyama + config deploiement production</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/1e91252" target="_blank"><code>1e91252</code></a></td><td>Switcher FR/EN + logo Heyama dans le header</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/4e0ff52" target="_blank"><code>4e0ff52</code></a></td><td>Fix script de deploiement pour Docker legacy</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/84c998c" target="_blank"><code>84c998c</code></a></td><td>Ajout class-validator et class-transformer (API)</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/d349b45" target="_blank"><code>d349b45</code></a></td><td>Fix URLs relatives pour la production</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/8918dde" target="_blank"><code>8918dde</code></a></td><td>Recherche, pagination, logo Heyama, fix responsive</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/988ff4c" target="_blank"><code>988ff4c</code></a></td><td>Suppression react-native-svg inutilise (fix EAS build)</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/21755e2" target="_blank"><code>21755e2</code></a></td><td>Recherche automatique pendant la saisie</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/64f65fb" target="_blank"><code>64f65fb</code></a></td><td>Documentation API Swagger a /api/docs</td></tr>
+    <tr><td><a href="https://github.com/cypriendtc/Heyama/commit/864e798" target="_blank"><code>864e798</code></a></td><td>Optimisation images : compression WebP + thumbnails via sharp</td></tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  Heyama Dev Team - Examen de recrutement - Septembre 2026
+</div>
+
+</body>
+</html>

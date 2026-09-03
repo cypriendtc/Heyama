@@ -62,6 +62,7 @@ export default function HomePage() {
   }, [page, search, t]);
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm(t('home.confirm_delete'))) return;
     try {
       await deleteObject(id);
       setObjects((prev) => prev.filter((o) => o._id !== id));

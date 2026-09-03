@@ -30,6 +30,7 @@ export default function ObjectDetailPage() {
 
   const handleDelete = async () => {
     if (!object) return;
+    if (!window.confirm(t('detail.confirm_delete'))) return;
     setDeleting(true);
     try {
       await deleteObject(object._id);
