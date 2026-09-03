@@ -163,8 +163,9 @@ export default function HomePage() {
               >
                 <a href={`/objects/${obj._id}`}>
                   <img
-                    src={obj.imageUrl}
+                    src={obj.thumbnailUrl || obj.imageUrl}
                     alt={obj.title}
+                    loading="lazy"
                     className="w-full h-48 object-cover"
                   />
                 </a>

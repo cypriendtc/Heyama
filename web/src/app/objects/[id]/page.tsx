@@ -77,6 +77,7 @@ export default function ObjectDetailPage() {
         <img
           src={object.imageUrl}
           alt={object.title}
+          loading="lazy"
           className="w-full max-h-96 object-cover"
         />
 

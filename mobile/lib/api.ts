@@ -10,6 +10,7 @@ export interface ObjectItem {
   title: string;
   description: string;
   imageUrl: string;
+  thumbnailUrl?: string;
   createdAt: string;
 }
 

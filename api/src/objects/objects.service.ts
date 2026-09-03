@@ -24,11 +24,13 @@ export class ObjectsService {
     dto: CreateObjectDto,
     file: Express.Multer.File,
   ): Promise<ObjectEntity> {
-    const imageUrl = await this.s3Service.upload(file);
+    const { imageUrl, thumbnailUrl } =
+      await this.s3Service.uploadOptimized(file);
     const created = new this.objectModel({
       title: dto.title,
       description: dto.description,
       imageUrl,
+      thumbnailUrl,
     });
     return created.save();
   }

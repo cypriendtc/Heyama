@@ -13,6 +13,9 @@ export class ObjectEntity extends Document {
   imageUrl: string;
 
   @Prop()
+  thumbnailUrl: string;
+
+  @Prop()
   createdAt: Date;
 }
 

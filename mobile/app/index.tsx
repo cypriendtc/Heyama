@@ -98,7 +98,7 @@ export default function HomeScreen() {
       onLongPress={() => handleDelete(item._id)}
       activeOpacity={0.8}
     >
-      <Image source={{ uri: item.imageUrl }} style={styles.image} />
+      <Image source={{ uri: item.thumbnailUrl || item.imageUrl }} style={styles.image} />
       <View style={styles.cardBody}>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description} numberOfLines={2}>

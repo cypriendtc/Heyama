@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 import { v4 as uuidv4 } from 'uuid';
+import sharp from 'sharp';
 
 @Injectable()
 export class S3Service implements OnModuleInit {
@@ -38,12 +39,7 @@ export class S3Service implements OnModuleInit {
     }
   }
 
-  async upload(file: Express.Multer.File): Promise<string> {
-    const ext = file.originalname.split('.').pop();
-    const key = `${uuidv4()}.${ext}`;
-    await this.client.putObject(this.bucket, key, file.buffer, file.size, {
-      'Content-Type': file.mimetype,
-    });
+  private buildUrl(key: string): string {
     const publicUrl = this.config.get<string>('S3_PUBLIC_URL');
     if (publicUrl) {
       return `${publicUrl}/${key}`;
@@ -53,10 +49,60 @@ export class S3Service implements OnModuleInit {
     return `http://${endpoint}:${port}/${this.bucket}/${key}`;
   }
 
+  async upload(file: Express.Multer.File): Promise<string> {
+    const ext = file.originalname.split('.').pop();
+    const key = `${uuidv4()}.${ext}`;
+    await this.client.putObject(this.bucket, key, file.buffer, file.size, {
+      'Content-Type': file.mimetype,
+    });
+    return this.buildUrl(key);
+  }
+
+  async uploadOptimized(
+    file: Express.Multer.File,
+  ): Promise<{ imageUrl: string; thumbnailUrl: string }> {
+    const id = uuidv4();
+
+    const optimized = await sharp(file.buffer)
+      .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer();
+
+    const imageKey = `${id}.webp`;
+    await this.client.putObject(
+      this.bucket,
+      imageKey,
+      optimized,
+      optimized.length,
+      { 'Content-Type': 'image/webp' },
+    );
+
+    const thumbnail = await sharp(file.buffer)
+      .resize(400, 400, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 70 })
+      .toBuffer();
+
+    const thumbKey = `thumb_${id}.webp`;
+    await this.client.putObject(
+      this.bucket,
+      thumbKey,
+      thumbnail,
+      thumbnail.length,
+      { 'Content-Type': 'image/webp' },
+    );
+
+    return {
+      imageUrl: this.buildUrl(imageKey),
+      thumbnailUrl: this.buildUrl(thumbKey),
+    };
+  }
+
   async delete(imageUrl: string): Promise<void> {
     const key = imageUrl.split('/').pop();
     if (key) {
       await this.client.removeObject(this.bucket, key);
+      const thumbKey = `thumb_${key}`;
+      await this.client.removeObject(this.bucket, thumbKey).catch(() => {});
     }
   }
 }
