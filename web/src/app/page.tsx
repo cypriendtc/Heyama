@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { getObjects, deleteObject, type ObjectItem, type PaginatedResponse } from '@/lib/api';
 import { socket } from '@/lib/socket';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ export default function HomePage() {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { t } = useTranslation();
 
   const loadObjects = useCallback(async (p: number, s: string) => {
@@ -71,10 +72,13 @@ export default function HomePage() {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPage(1);
-    setSearch(searchInput);
+  const handleSearchInput = (value: string) => {
+    setSearchInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setPage(1);
+      setSearch(value);
+    }, 300);
   };
 
   const pageInfo = t('home.page_of')
@@ -98,16 +102,16 @@ export default function HomePage() {
             <span className="ml-2 text-base font-normal text-purple-400">({total})</span>
           )}
         </h1>
-        <form onSubmit={handleSearch} className="relative w-full sm:w-72">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400" />
           <input
             type="text"
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => handleSearchInput(e.target.value)}
             placeholder={t('home.search')}
             className="w-full pl-10 pr-4 py-2 rounded-full border border-purple-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
-        </form>
+        </div>
       </div>
 
       {objects.length === 0 && !loading ? (
@@ -121,7 +125,7 @@ export default function HomePage() {
                 {t('home.no_results')} &quot;{search}&quot;
               </p>
               <button
-                onClick={() => { setSearchInput(''); setSearch(''); setPage(1); }}
+                onClick={() => { handleSearchInput(''); }}
                 className="mt-4 text-purple-600 hover:text-purple-700 font-medium"
               >
                 {t('home.empty.cta')}
