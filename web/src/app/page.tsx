@@ -15,8 +15,78 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Trash2, Search, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { MoreVertical, Pencil, Bookmark, Share2, Trash2, Search, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+
+function CardMenu({ obj, onDelete, t }: { obj: ObjectItem; onDelete: (obj: ObjectItem) => void; t: (key: string) => string }) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const handleAction = (action: string) => {
+    setOpen(false);
+    if (action === 'delete') {
+      onDelete(obj);
+    } else {
+      toast({ title: t('home.toast.coming_soon') });
+    }
+  };
+
+  return (
+    <div ref={menuRef} className="absolute top-2 right-2 z-10">
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(!open); }}
+        className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center hover:bg-black/60 transition-colors"
+      >
+        <MoreVertical className="h-4 w-4 text-white" />
+      </button>
+
+      {open && (
+        <div className="absolute top-10 right-0 w-44 bg-white rounded-xl shadow-lg border border-purple-100 py-1.5 animate-in fade-in zoom-in-95 duration-150">
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAction('edit'); }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+          >
+            <Pencil className="h-4 w-4" />
+            {t('home.menu.edit')}
+          </button>
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAction('save'); }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+          >
+            <Bookmark className="h-4 w-4" />
+            {t('home.menu.save')}
+          </button>
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAction('share'); }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+          >
+            <Share2 className="h-4 w-4" />
+            {t('home.menu.share')}
+          </button>
+          <div className="my-1 border-t border-gray-100" />
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAction('delete'); }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+          >
+            <Trash2 className="h-4 w-4" />
+            {t('home.menu.delete')}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function HomePage() {
   const [objects, setObjects] = useState<ObjectItem[]>([]);
@@ -175,39 +245,30 @@ export default function HomePage() {
                 key={obj._id}
                 className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-purple-100"
               >
-                <a href={`/objects/${obj._id}`}>
-                  <img
-                    src={obj.thumbnailUrl || obj.imageUrl}
-                    alt={obj.title}
-                    loading="lazy"
-                    className="w-full h-48 object-cover"
-                  />
-                </a>
+                <div className="relative">
+                  <a href={`/objects/${obj._id}`}>
+                    <img
+                      src={obj.thumbnailUrl || obj.imageUrl}
+                      alt={obj.title}
+                      loading="lazy"
+                      className="w-full h-48 object-cover"
+                    />
+                  </a>
+                  <CardMenu obj={obj} onDelete={setDeleteTarget} t={t as (key: string) => string} />
+                </div>
                 <div className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <a
-                        href={`/objects/${obj._id}`}
-                        className="font-semibold text-lg text-purple-900 hover:text-purple-600 transition-colors"
-                      >
-                        {obj.title}
-                      </a>
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                        {obj.description}
-                      </p>
-                      <p className="text-xs text-purple-400 mt-2 font-medium">
-                        {new Date(obj.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDeleteTarget(obj)}
-                      className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full shrink-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <a
+                    href={`/objects/${obj._id}`}
+                    className="font-semibold text-lg text-purple-900 hover:text-purple-600 transition-colors"
+                  >
+                    {obj.title}
+                  </a>
+                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                    {obj.description}
+                  </p>
+                  <p className="text-xs text-purple-400 mt-2 font-medium">
+                    {new Date(obj.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
             ))}
